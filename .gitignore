@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+.bun/
+
+# Build output
+dist/
+
+# Test artifacts
+*.log
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Benchmark output
+my_index/
+test_index/

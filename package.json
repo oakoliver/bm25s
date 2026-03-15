@@ -1,0 +1,63 @@
+{
+  "name": "bun-bm25s",
+  "version": "1.0.0",
+  "description": "Ultra-fast BM25 full-text search for Bun. Zero dependencies, 2x faster than Python bm25s. Eager sparse scoring with CSC matrices.",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir ./dist --target bun",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "benchmark": "bun run benchmarks/benchmark.ts",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "bm25",
+    "bm25s",
+    "search",
+    "full-text-search",
+    "information-retrieval",
+    "text-search",
+    "lexical-search",
+    "sparse-retrieval",
+    "document-retrieval",
+    "ranking",
+    "bun",
+    "typescript",
+    "zero-dependencies",
+    "fast",
+    "performant"
+  ],
+  "author": "Antonio Oliveira <oliveira.antonio.cc@gmail.com> (https://oakoliver.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oakoliver/bun-bm25s.git"
+  },
+  "homepage": "https://github.com/oakoliver/bun-bm25s#readme",
+  "bugs": {
+    "url": "https://github.com/oakoliver/bun-bm25s/issues"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
