@@ -69,7 +69,7 @@ export function scoreTfcBm25l(
   avgDocLen: number,
   k1: number,
   b: number,
-  delta: number
+  delta: number = 0.5
 ): number {
   const c = tf / (1 - b + b * docLen / avgDocLen);
   return ((k1 + 1) * (c + delta)) / (k1 + c + delta);
@@ -84,7 +84,7 @@ export function scoreTfcBm25plus(
   avgDocLen: number,
   k1: number,
   b: number,
-  delta: number
+  delta: number = 1.0
 ): number {
   const num = (k1 + 1) * tf;
   const den = k1 * (1 - b + b * docLen / avgDocLen) + tf;

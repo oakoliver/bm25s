@@ -1,15 +1,16 @@
 {
-  "name": "bun-bm25s",
+  "name": "bm25s",
   "version": "1.0.0",
-  "description": "Ultra-fast BM25 full-text search for Bun. Zero dependencies, 2x faster than Python bm25s. Eager sparse scoring with CSC matrices.",
+  "description": "Ultra-fast BM25 full-text search for JavaScript. Zero dependencies, multi-runtime (Node.js, Bun, Deno). Eager sparse scoring with CSC matrices.",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -17,11 +18,16 @@
     "src"
   ],
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir ./dist --target bun",
+    "build": "npm run build:esm && npm run build:cjs && npm run build:types",
+    "build:esm": "esbuild src/index.ts --bundle --format=esm --outfile=dist/index.js --platform=node",
+    "build:cjs": "esbuild src/index.ts --bundle --format=cjs --outfile=dist/index.cjs --platform=node",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
+    "test:node": "node --test tests/*.test.js",
+    "test:bun": "bun test",
     "benchmark": "bun run benchmarks/benchmark.ts",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "bm25",
@@ -34,30 +40,34 @@
     "sparse-retrieval",
     "document-retrieval",
     "ranking",
+    "nodejs",
     "bun",
+    "deno",
     "typescript",
     "zero-dependencies",
     "fast",
-    "performant"
+    "performant",
+    "multi-runtime"
   ],
-  "author": "Antonio Oliveira <oliveira.antonio.cc@gmail.com> (https://oakoliver.com)",
+  "author": "Antonio Oliveira <antonio@oakoliver.com> (https://oakoliver.com)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oakoliver/bun-bm25s.git"
+    "url": "git+https://github.com/oakoliver/bm25s.git"
   },
-  "homepage": "https://github.com/oakoliver/bun-bm25s#readme",
+  "homepage": "https://github.com/oakoliver/bm25s#readme",
   "bugs": {
-    "url": "https://github.com/oakoliver/bun-bm25s/issues"
+    "url": "https://github.com/oakoliver/bm25s/issues"
   },
   "devDependencies": {
-    "@types/bun": "latest",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.27.4",
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "engines": {
-    "bun": ">=1.0.0"
+    "node": ">=18.0.0"
   }
 }
