@@ -1,6 +1,6 @@
 {
   "name": "bm25s",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Ultra-fast BM25 full-text search for JavaScript. Zero dependencies, multi-runtime (Node.js, Bun, Deno). Eager sparse scoring with CSC matrices.",
   "main": "dist/index.js",
   "module": "dist/index.js",
