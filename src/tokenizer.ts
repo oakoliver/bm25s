@@ -25,10 +25,15 @@ export type StemmerFn = (word: string) => string;
 export type SplitterFn = (text: string) => string[];
 
 /**
- * Default token pattern matching word characters (2+ chars)
- * Equivalent to Python's r"(?u)\b\w\w+\b"
+ * Default token pattern matching runs of 2+ word characters.
+ *
+ * Equivalent to Python's r"(?u)\b\w\w+\b" (the bm25s default). In Python,
+ * `\w` and `\b` are Unicode-aware, whereas in JavaScript they are ASCII-only
+ * even with the `u` flag (so "café" would become "caf" and Hangul would be
+ * dropped entirely). A maximal run of Unicode letters/numbers/underscore of
+ * length >= 2 is exactly what the Python pattern matches.
  */
-const DEFAULT_TOKEN_PATTERN = /\b\w\w+\b/gu;
+const DEFAULT_TOKEN_PATTERN = /[\p{L}\p{N}_]{2,}/gu;
 
 /**
  * Create a splitter function from a regex pattern

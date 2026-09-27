@@ -2,6 +2,8 @@
 
 A Bun-native, zero-dependency implementation of BM25 for extremely fast full-text search. Inspired by the Python [bm25s](https://github.com/xhluca/bm25s) library.
 
+> **Upstream parity:** tracks Python bm25s **v0.3.11** (stopword lists, default tokenization pattern, and scores for all five BM25 variants verified against upstream). See [Upstream parity](#upstream-parity).
+
 ## Features
 
 - **Blazing Fast**: 4.3M+ tokens/sec indexing, 2-3x faster than Python bm25s
@@ -9,7 +11,7 @@ A Bun-native, zero-dependency implementation of BM25 for extremely fast full-tex
 - **Bun Native**: Optimized for the Bun runtime
 - **Multiple BM25 Variants**: Robertson, Lucene, ATIRE, BM25L, BM25+
 - **Eager Sparse Scoring**: Precomputes scores during indexing for instant retrieval
-- **Built-in Tokenizer**: Stopwords for 12 languages, custom stemming support
+- **Built-in Tokenizer**: Stopwords for 15 languages (synced with bm25s), custom stemming support
 - **Persistence**: Save and load indices to/from disk
 
 ## Installation
@@ -85,7 +87,9 @@ const result = tokenize(texts, {
 const ids = tokenize(texts, { returnIds: true });
 ```
 
-**Supported stopword languages:** `en`, `de`, `fr`, `es`, `it`, `pt`, `nl`, `ru`, `ar`, `zh`, `ja`, `ko`
+**Supported stopword languages:** `en`, `en_plus`, `de`, `fr`, `es`, `pt`, `it`, `nl`, `ru`, `sv`, `no`, `zh`, `tr`, `ko`, `da` (full names such as `"korean"` or `"danish"` also work). The lists are identical to upstream bm25s; `en` is the short Lucene list used by bm25s, `en_plus` is the extended list.
+
+The default splitter is the Unicode-aware equivalent of bm25s' `r"(?u)\b\w\w+\b"`, so accented, CJK and Hangul words are kept intact.
 
 ### `Tokenizer` Class
 
@@ -166,6 +170,7 @@ Save the index to disk.
 ```typescript
 await retriever.save("./my_index", {
   corpus: originalDocs,  // Optionally save corpus
+  // showProgress / leaveProgress are accepted for bm25s API parity (no-op here)
 });
 ```
 
@@ -178,6 +183,16 @@ const retriever = await BM25.load("./my_index", {
   loadCorpus: true,  // Load saved corpus
 });
 ```
+
+## Upstream parity
+
+This package is kept in sync with Python [bm25s](https://github.com/xhluca/bm25s) and is currently at parity with **v0.3.11**. Synced in 2.0.0 (from the v0.3.2 baseline). **Breaking:** default stopword lists and the word splitter now match upstream, so tokens and search results change; rebuild saved indexes after upgrading.
+
+- Korean (`ko`, v0.3.4) and Danish (`da`, v0.3.11) stopwords
+- `showProgress` / `leaveProgress` options on `save()` / `BM25.load()` (v0.3.6, v0.3.10), accepted as no-ops
+- Parity fixes: all stopword lists now match upstream verbatim (notably the default `en` list is the 33-word Lucene list rather than NLTK's), and the default splitter is Unicode-aware like Python's `\w`
+
+Python-only upstream features (numba/jax backends, Hugging Face Hub integration, CLI/MCP server, BEIR utilities) are out of scope.
 
 ## BM25 Variants
 

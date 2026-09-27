@@ -150,6 +150,8 @@ export class BM25 {
       corpus?: any[];
       /** Show progress (currently unused, for API compatibility) */
       showProgress?: boolean;
+      /** Leave progress bars after completion (currently unused, for API compatibility) */
+      leaveProgress?: boolean;
     } = {}
   ): void {
     let corpusTokenIds: number[][];
@@ -383,7 +385,16 @@ export class BM25 {
   /**
    * Save the BM25 index to a directory
    */
-  async save(saveDir: string, options: { corpus?: any[] } = {}): Promise<void> {
+  async save(
+    saveDir: string,
+    options: {
+      corpus?: any[];
+      /** Show progress (no-op; accepted for parity with bm25s >= 0.3.6) */
+      showProgress?: boolean;
+      /** Leave progress bars after completion (no-op; accepted for parity with bm25s >= 0.3.10) */
+      leaveProgress?: boolean;
+    } = {}
+  ): Promise<void> {
     if (!this._index) {
       throw new Error("Index not built. Call index() first.");
     }
@@ -447,7 +458,13 @@ export class BM25 {
    */
   static async load(
     saveDir: string,
-    options: { loadCorpus?: boolean } = {}
+    options: {
+      loadCorpus?: boolean;
+      /** Show progress (no-op; accepted for parity with bm25s >= 0.3.10) */
+      showProgress?: boolean;
+      /** Leave progress bars after completion (no-op; accepted for parity with bm25s >= 0.3.10) */
+      leaveProgress?: boolean;
+    } = {}
   ): Promise<BM25> {
     const fs = await import("fs/promises");
     const path = await import("path");

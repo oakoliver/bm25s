@@ -71,6 +71,8 @@ export {
   STOPWORDS_NORWEGIAN,
   STOPWORDS_CHINESE,
   STOPWORDS_TURKISH,
+  STOPWORDS_KOREAN,
+  STOPWORDS_DANISH,
   STOPWORDS_MAP,
   type StopwordsLanguage,
 } from "./stopwords";
