@@ -1,0 +1,107 @@
+{
+  "_note": "Chinese text is pre-segmented with spaces, as a word segmenter would output it: bm25s splits on \\w runs and does not segment Chinese itself.",
+  "docs": [
+    {
+      "lang": "en",
+      "text": "BM25 ranks documents by term frequency, inverse document frequency and document length."
+    },
+    {
+      "lang": "en",
+      "text": "The tokenizer lowercases text, splits it on Unicode word boundaries and removes stopwords."
+    },
+    {
+      "lang": "fr",
+      "text": "Le moteur de recherche utilise l'index inversé pour trouver très vite les documents pertinents."
+    },
+    {
+      "lang": "fr",
+      "text": "Les étudiants préfèrent les cafés près de l'université, à Montréal comme à Québec."
+    },
+    {
+      "lang": "da",
+      "text": "Søgemaskinen finder de mest relevante dokumenter på få millisekunder."
+    },
+    {
+      "lang": "da",
+      "text": "Vi bygger et omvendt indeks over alle ord i hvert dokument, og så søger vi i det."
+    },
+    {
+      "lang": "ko",
+      "text": "한국어 검색 엔진 그리고 역색인 구조 및 문서 순위 계산"
+    },
+    {
+      "lang": "ko",
+      "text": "오늘 서울 날씨 맑음 그리고 기온 상승 및 미세먼지 보통"
+    },
+    {
+      "lang": "zh",
+      "text": "我们 的 搜索 引擎 使用 倒排 索引 和 BM25 排序 算法"
+    },
+    {
+      "lang": "zh",
+      "text": "北京 今天 天气 很 好 适合 散步 和 骑车"
+    },
+    {
+      "lang": "de",
+      "text": "Die Suchmaschine durchsucht Millionen Dokumente in wenigen Millisekunden."
+    },
+    {
+      "lang": "de",
+      "text": "Die Straßenbahn fährt über die Brücke nach Köln und zurück."
+    },
+    {
+      "lang": "es",
+      "text": "El índice invertido permite búsquedas rápidas en documentos en español."
+    },
+    {
+      "lang": "ru",
+      "text": "Поисковая система находит документы по ключевым словам очень быстро."
+    },
+    {
+      "lang": "pt",
+      "text": "O mecanismo de busca encontra documentos relevantes em português."
+    },
+    {
+      "lang": "sv",
+      "text": "Sökmotorn hittar relevanta dokument på några millisekunder."
+    },
+    {
+      "lang": "tr",
+      "text": "Arama motoru belgeleri çok hızlı bir şekilde sıralar."
+    }
+  ],
+  "queries": [
+    {
+      "lang": "ko",
+      "text": "검색 엔진 그리고 역색인 구조"
+    },
+    {
+      "lang": "da",
+      "text": "Hvordan finder søgemaskinen de relevante dokumenter?"
+    },
+    {
+      "lang": "fr",
+      "text": "Où est l'index inversé du moteur de recherche ?"
+    },
+    {
+      "lang": "zh",
+      "text": "如何 使用 倒排 索引 搜索"
+    },
+    {
+      "lang": "de",
+      "text": "Wie schnell ist die Suchmaschine?"
+    },
+    {
+      "lang": "ru",
+      "text": "как поисковая система находит документы"
+    },
+    {
+      "lang": "es",
+      "text": "búsquedas en el índice invertido"
+    },
+    {
+      "lang": "en",
+      "text": "BM25 index for all the documents"
+    }
+  ]
+}
