@@ -4,6 +4,12 @@ A Bun-native, zero-dependency implementation of BM25 for extremely fast full-tex
 
 > **Upstream parity:** tracks Python bm25s **v0.3.11** (stopword lists, default tokenization pattern, and scores for all five BM25 variants verified against upstream). See [Upstream parity](#upstream-parity).
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/oakoliver/bm25s/main/assets/search.gif" alt="Terminal recording: bun examples/quick-search.ts indexes 12 short animal facts in under a millisecond, then answers two queries with ranked results, BM25 scores and score bars" width="820">
+</p>
+
+<sub>Recorded with <a href="https://github.com/oakoliver/vhs">@oakoliver/vhs</a> from <a href="examples/quick-search.ts"><code>examples/quick-search.ts</code></a> (<a href="assets/tapes/search.tape">tape</a>).</sub>
+
 ## Features
 
 - **Blazing Fast**: 4.3M+ tokens/sec indexing, 2-3x faster than Python bm25s
@@ -206,6 +212,10 @@ Choose the variant that best fits your use case:
 | `bm25l` | BM25L (with delta parameter) | Long documents |
 | `bm25+` | BM25+ (with delta parameter) | Handles term absence better |
 
+<img src="https://raw.githubusercontent.com/oakoliver/bm25s/main/assets/variants.png" alt="Output of bun examples/variants.ts: the query 'cats that sleep' scored by lucene, robertson, atire, bm25l and bm25+; every variant ranks the same two documents first, with different score scales" width="760">
+
+<sub>Same query, same ranking, different score scales: <a href="examples/variants.ts"><code>bun examples/variants.ts "cats that sleep"</code></a>.</sub>
+
 ```typescript
 // Using different variants
 const lucene = new BM25({ method: "lucene" });
@@ -214,6 +224,13 @@ const bm25l = new BM25({ method: "bm25l", delta: 1.0 });
 ```
 
 ## Benchmarks
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/oakoliver/bm25s/main/assets/speedup-dark.png">
+  <img src="https://raw.githubusercontent.com/oakoliver/bm25s/main/assets/speedup-light.png" alt="Line charts of bm25s speed relative to Python bm25s 0.3.2 by corpus size (1K to 100K documents). Indexing: about 0.7x at 1K, rising to 2.6x (numpy) and 2.8x (numba) at 100K. Retrieval: vs numpy 0.12x at 1K then 2.5x to 3.3x from 5K up; vs numba 0.02x at 1K rising to 0.86x at 100K, so the numba backend retrieves faster at every size." width="820">
+</picture>
+
+<sub>Chart: one run of <code>bun run benchmarks/compare.ts</code> on Apple M5 Max (macOS 27.0, Bun 1.4.0, Python bm25s 0.3.2, numpy 2.4.6, numba 0.64.0), 2026-10-03. Raw log: <a href="benchmarks/results/compare-2026-10-03-apple-m5-max.txt"><code>benchmarks/results/</code></a>; rendered by <a href="benchmarks/chart.py"><code>benchmarks/chart.py</code></a>. The tables below are from an earlier run on a different machine.</sub>
 
 *Benchmarks run on Apple M2 Max (12 cores, 96GB RAM), macOS 26.1, Bun 1.3.10*
 

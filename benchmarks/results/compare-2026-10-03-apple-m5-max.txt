@@ -1,0 +1,110 @@
+
+====================================================================================================
+BUN-BM25S vs PYTHON BM25S COMPARISON BENCHMARK
+====================================================================================================
+
+SYSTEM SPECIFICATIONS:
+--------------------------------------------------
+  Chip: Apple M5 Max
+  Cores: 18 (6 Super and 12 Performance)
+  Memory: 128 GB
+  OS: macOS 27.0
+  Bun: 1.4.0
+  Date: 2026-10-03T02:27:03.339Z
+
+Warming up Bun JIT...
+Warm-up complete.
+
+Running Python bm25s benchmark...
+Running Python bm25s benchmark...
+  [numpy] Benchmarking 1,000 documents...
+  [numpy] Benchmarking 5,000 documents...
+  [numpy] Benchmarking 10,000 documents...
+  [numpy] Benchmarking 50,000 documents...
+  [numpy] Benchmarking 100,000 documents...
+  Warming up numba JIT...
+  [numba] Benchmarking 1,000 documents...
+  [numba] Benchmarking 5,000 documents...
+  [numba] Benchmarking 10,000 documents...
+  [numba] Benchmarking 50,000 documents...
+  [numba] Benchmarking 100,000 documents...
+
+
+Python bm25s version: with numba
+
+Running Bun bm25s benchmark...
+  Benchmarking 1,000 documents...
+  Benchmarking 5,000 documents...
+  Benchmarking 10,000 documents...
+  Benchmarking 50,000 documents...
+  Benchmarking 100,000 documents...
+
+========================================================================================================================
+INDEXING PERFORMANCE: bun-bm25s vs Python bm25s (numpy backend)
+========================================================================================================================
+
+Corpus Size    Python         Bun            Speedup        Python tok/s      Bun tok/s         Speedup
+------------------------------------------------------------------------------------------------------------------------
+1,000          17.63 ms       23.08 ms       0.76x 🐢       2,840,681         2,208,719         0.78x 🐢
+5,000          85.69 ms       48.28 ms       1.77x 🚀       2,926,425         5,309,049         1.81x 🚀
+10,000         179.38 ms      75.48 ms       2.38x 🚀       2,786,156         6,796,086         2.44x 🚀
+50,000         874.37 ms      352.93 ms      2.48x 🚀       2,866,410         7,271,069         2.54x 🚀
+100,000        1.76 s         670.26 ms      2.63x 🚀       2,844,240         7,657,741         2.69x 🚀
+
+========================================================================================================================
+RETRIEVAL PERFORMANCE: bun-bm25s vs Python bm25s (numpy backend) - 1000 queries, k=10
+========================================================================================================================
+
+Corpus Size    Python QPS        Bun QPS           Speedup        Python Latency    Bun Latency       Speedup
+------------------------------------------------------------------------------------------------------------------------
+1,000          62,244            7,338             0.12x 🐢       16.07 µs          136.27 µs         0.12x 🐢
+5,000          22,134            54,884            2.48x 🚀       45.18 µs          18.22 µs          2.48x 🚀
+10,000         11,721            36,140            3.08x 🚀       85.32 µs          27.67 µs          3.08x 🚀
+50,000         2,598             8,219             3.16x 🚀       384.84 µs         121.67 µs         3.16x 🚀
+100,000        1,394             4,631             3.32x 🚀       717.19 µs         215.95 µs         3.32x 🚀
+
+========================================================================================================================
+INDEXING PERFORMANCE: bun-bm25s vs Python bm25s (numba backend)
+========================================================================================================================
+
+Corpus Size    Python         Bun            Speedup        Python tok/s      Bun tok/s         Speedup
+------------------------------------------------------------------------------------------------------------------------
+1,000          16.37 ms       23.08 ms       0.71x 🐢       3,059,373         2,208,719         0.72x 🐢
+5,000          85.07 ms       48.28 ms       1.76x 🚀       2,947,751         5,309,049         1.80x 🚀
+10,000         162.43 ms      75.48 ms       2.15x 🚀       3,076,849         6,796,086         2.21x 🚀
+50,000         861.05 ms      352.93 ms      2.44x 🚀       2,910,759         7,271,069         2.50x 🚀
+100,000        1.85 s         670.26 ms      2.76x 🚀       2,709,995         7,657,741         2.83x 🚀
+
+========================================================================================================================
+RETRIEVAL PERFORMANCE: bun-bm25s vs Python bm25s (numba backend) - 1000 queries, k=10
+========================================================================================================================
+
+Corpus Size    Python QPS        Bun QPS           Speedup        Python Latency    Bun Latency       Speedup
+------------------------------------------------------------------------------------------------------------------------
+1,000          319,602           7,338             0.02x 🐢       3.13 µs           136.27 µs         0.02x 🐢
+5,000          115,632           54,884            0.47x 🐢       8.65 µs           18.22 µs          0.47x 🐢
+10,000         65,298            36,140            0.55x 🐢       15.31 µs          27.67 µs          0.55x 🐢
+50,000         14,877            8,219             0.55x 🐢       67.22 µs          121.67 µs         0.55x 🐢
+100,000        5,410             4,631             0.86x 🐢       184.84 µs         215.95 µs         0.86x 🐢
+
+================================================================================
+SUMMARY
+================================================================================
+
+vs Python bm25s (numpy backend):
+  - Indexing: 2.00x faster
+  - Retrieval: 2.43x faster
+
+vs Python bm25s (numba backend - JIT compiled):
+  - Indexing: 1.96x faster
+  - Retrieval: 0.49x faster
+
+Peak bun-bm25s Performance (100,000 docs):
+  - Index throughput: 7,657,741 tokens/sec
+  - Query throughput: 4,631 QPS
+  - Query latency: 215.95 µs
+
+🎉 bun-bm25s is faster than Python bm25s!
+
+✅ Comparison complete!
+
