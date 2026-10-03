@@ -38,8 +38,10 @@ export function topK(
     };
   }
 
-  // For small arrays or large k, use full sort
-  if (n <= 1000 || k > n / 2) {
+  // Full sort only pays off when most of the array is returned. For small k
+  // the heap is far cheaper even on small arrays (a comparator sort of 1,000
+  // indices per query made 1K-doc corpora slower to query than 5K-doc ones).
+  if (k > n / 2) {
     return topKFullSort(scores, k, sorted);
   }
 
@@ -96,6 +98,11 @@ function topKHeap(
   const leftChild = (i: number) => 2 * i + 1;
   const rightChild = (i: number) => 2 * i + 2;
 
+  // Heap order: the root is the least preferred entry (lowest score, and the
+  // highest index among equal scores), so evictions match a stable sort.
+  const less = (a: [number, number], b: [number, number]) =>
+    a[0] < b[0] || (a[0] === b[0] && a[1] > b[1]);
+
   const swap = (i: number, j: number) => {
     const temp = heap[i];
     heap[i] = heap[j];
@@ -103,7 +110,7 @@ function topKHeap(
   };
 
   const siftUp = (i: number) => {
-    while (i > 0 && heap[parent(i)][0] > heap[i][0]) {
+    while (i > 0 && less(heap[i], heap[parent(i)])) {
       swap(i, parent(i));
       i = parent(i);
     }
@@ -115,10 +122,10 @@ function topKHeap(
     const left = leftChild(i);
     const right = rightChild(i);
 
-    if (left < n && heap[left][0] < heap[smallest][0]) {
+    if (left < n && less(heap[left], heap[smallest])) {
       smallest = left;
     }
-    if (right < n && heap[right][0] < heap[smallest][0]) {
+    if (right < n && less(heap[right], heap[smallest])) {
       smallest = right;
     }
 
@@ -149,7 +156,8 @@ function topKHeap(
 
   if (sorted) {
     // Sort by extracting from heap in reverse order
-    const sortedHeap = heap.slice().sort((a, b) => b[0] - a[0]);
+    // Ties by ascending index, matching the stable full sort
+    const sortedHeap = heap.slice().sort((a, b) => b[0] - a[0] || a[1] - b[1]);
     for (let i = 0; i < sortedHeap.length; i++) {
       resultScores[i] = sortedHeap[i][0];
       resultIndices[i] = sortedHeap[i][1];
