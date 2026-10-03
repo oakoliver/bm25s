@@ -192,6 +192,11 @@ function formatTime(ms: number): string {
   return `${(ms / 1000).toFixed(2)} s`;
 }
 
+/** Average speed ratio as "N.NNx faster" or "N.NNx slower". */
+function relative(ratio: number): string {
+  return ratio >= 1 ? `${ratio.toFixed(2)}x faster` : `${(1 / ratio).toFixed(2)}x slower`;
+}
+
 function formatSpeedup(bunValue: number, pythonValue: number, higherIsBetter: boolean): string {
   const ratio = higherIsBetter ? bunValue / pythonValue : pythonValue / bunValue;
   const emoji = ratio > 1.05 ? "🚀" : ratio < 0.95 ? "🐢" : "⚖️";
@@ -337,14 +342,14 @@ async function main(): Promise<void> {
   console.log();
   
   console.log("vs Python bm25s (numpy backend):");
-  console.log(`  - Indexing: ${numpyStats.avgIndexSpeedup.toFixed(2)}x faster`);
-  console.log(`  - Retrieval: ${numpyStats.avgQpsSpeedup.toFixed(2)}x faster`);
+  console.log(`  - Indexing: ${relative(numpyStats.avgIndexSpeedup)}`);
+  console.log(`  - Retrieval: ${relative(numpyStats.avgQpsSpeedup)}`);
   
   if (pythonOutput.numba_results.length > 0) {
     console.log();
     console.log("vs Python bm25s (numba backend - JIT compiled):");
-    console.log(`  - Indexing: ${numbaStats.avgIndexSpeedup.toFixed(2)}x faster`);
-    console.log(`  - Retrieval: ${numbaStats.avgQpsSpeedup.toFixed(2)}x faster`);
+    console.log(`  - Indexing: ${relative(numbaStats.avgIndexSpeedup)}`);
+    console.log(`  - Retrieval: ${relative(numbaStats.avgQpsSpeedup)}`);
   }
   
   console.log();
@@ -356,10 +361,6 @@ async function main(): Promise<void> {
   console.log(`  - Query throughput: ${formatNumber(Math.round(lastBun.queries_per_second))} QPS`);
   console.log(`  - Query latency: ${formatTime(lastBun.avg_query_time_ms)}`);
   console.log();
-  
-  if (numpyStats.avgIndexSpeedup > 1 && numpyStats.avgQpsSpeedup > 1) {
-    console.log("🎉 bun-bm25s is faster than Python bm25s!");
-  }
   
   console.log("\n✅ Comparison complete!\n");
 }

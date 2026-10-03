@@ -1,6 +1,6 @@
-# bun-bm25s
+# bm25s
 
-A Bun-native, zero-dependency implementation of BM25 for extremely fast full-text search. Inspired by the Python [bm25s](https://github.com/xhluca/bm25s) library.
+A zero-dependency TypeScript implementation of BM25 full-text search, built for Bun. A port of the Python [bm25s](https://github.com/xhluca/bm25s) library.
 
 > **Upstream parity:** tracks Python bm25s **v0.3.11** (stopword lists, default tokenization pattern, and scores for all five BM25 variants verified against upstream). See [Upstream parity](#upstream-parity).
 
@@ -12,7 +12,7 @@ A Bun-native, zero-dependency implementation of BM25 for extremely fast full-tex
 
 ## Features
 
-- **Blazing Fast**: 4.3M+ tokens/sec indexing, 2-3x faster than Python bm25s
+- **Fast indexing**: about 1.8x to 2.8x faster than Python bm25s from 5,000 documents up (see [Benchmarks](#benchmarks); retrieval is slower than bm25s's numba backend)
 - **Zero Dependencies**: Pure TypeScript, no external packages required
 - **Bun Native**: Optimized for the Bun runtime
 - **Multiple BM25 Variants**: Robertson, Lucene, ATIRE, BM25L, BM25+
@@ -23,21 +23,23 @@ A Bun-native, zero-dependency implementation of BM25 for extremely fast full-tex
 ## Installation
 
 ```bash
-bun add bun-bm25s
+npm install bm25s
+# or
+bun add bm25s
 ```
 
 Or clone and use directly:
 
 ```bash
-git clone https://github.com/oakoliver/bun-bm25s
-cd bun-bm25s
+git clone https://github.com/oakoliver/bm25s
+cd bm25s
 bun install
 ```
 
 ## Quickstart
 
 ```typescript
-import { BM25, tokenize } from "bun-bm25s";
+import { BM25, tokenize } from "bm25s";
 
 // Create your corpus
 const corpus = [
@@ -74,7 +76,7 @@ const loaded = await BM25.load("my_index");
 Tokenize text documents into token IDs.
 
 ```typescript
-import { tokenize } from "bun-bm25s";
+import { tokenize } from "bm25s";
 
 // Basic usage
 const result = tokenize(["hello world", "foo bar"]);
@@ -102,7 +104,7 @@ The default splitter is the Unicode-aware equivalent of bm25s' `r"(?u)\b\w\w+\b"
 For more control, use the `Tokenizer` class directly:
 
 ```typescript
-import { Tokenizer } from "bun-bm25s";
+import { Tokenizer } from "bm25s";
 
 const tokenizer = new Tokenizer({
   lower: true,
@@ -128,7 +130,7 @@ tokenizer.loadVocab(vocab);
 Main class for indexing and retrieval.
 
 ```typescript
-import { BM25 } from "bun-bm25s";
+import { BM25 } from "bm25s";
 
 // Create with options
 const retriever = new BM25({
@@ -230,57 +232,25 @@ const bm25l = new BM25({ method: "bm25l", delta: 1.0 });
   <img src="https://raw.githubusercontent.com/oakoliver/bm25s/main/assets/speedup-light.png" alt="Line charts of bm25s speed relative to Python bm25s 0.3.2 by corpus size (1K to 100K documents). Indexing: about 0.7x at 1K, rising to 2.6x (numpy) and 2.8x (numba) at 100K. Retrieval: vs numpy 0.12x at 1K then 2.5x to 3.3x from 5K up; vs numba 0.02x at 1K rising to 0.86x at 100K, so the numba backend retrieves faster at every size." width="820">
 </picture>
 
-<sub>Chart: one run of <code>bun run benchmarks/compare.ts</code> on Apple M5 Max (macOS 27.0, Bun 1.4.0, Python bm25s 0.3.2, numpy 2.4.6, numba 0.64.0), 2026-10-03. Raw log: <a href="benchmarks/results/compare-2026-10-03-apple-m5-max.txt"><code>benchmarks/results/</code></a>; rendered by <a href="benchmarks/chart.py"><code>benchmarks/chart.py</code></a>. The tables below are from an earlier run on a different machine.</sub>
-
-*Benchmarks run on Apple M2 Max (12 cores, 96GB RAM), macOS 26.1, Bun 1.3.10*
+<sub>Chart: one run of <code>bun run benchmarks/compare.ts</code> on Apple M5 Max (macOS 27.0, Bun 1.4.0, Python bm25s 0.3.2, numpy 2.4.6, numba 0.64.0), 2026-10-03. Raw log: <a href="benchmarks/results/compare-2026-10-03-apple-m5-max.txt"><code>benchmarks/results/</code></a>; rendered by <a href="benchmarks/chart.py"><code>benchmarks/chart.py</code></a>. The table below is from the same run; the tables under Detailed Benchmarks are from an earlier run of <code>benchmarks/benchmark.ts</code> on Apple M2 Max (macOS 26.1, Bun 1.3.10).</sub>
 
 ### Comparison with Python bm25s
 
-bun-bm25s is significantly faster than the original Python bm25s library (numpy backend):
+From the run in the chart (Apple M5 Max, 2026-10-03, 1,000 queries, k=10):
 
-**vs Python bm25s (numpy backend):**
+| Corpus size | Indexing vs numpy | Indexing vs numba | Retrieval vs numpy | Retrieval vs numba |
+|-------------|-------------------|-------------------|--------------------|--------------------|
+| 1,000 | 0.76x | 0.71x | 0.12x | 0.02x |
+| 5,000 | 1.77x | 1.76x | 2.48x | 0.47x |
+| 10,000 | 2.38x | 2.15x | 3.08x | 0.55x |
+| 50,000 | 2.48x | 2.44x | 3.16x | 0.55x |
+| 100,000 | 2.63x | 2.76x | 3.32x | 0.86x |
 
-| Metric | Python (numpy) | bun-bm25s | Speedup |
-|--------|----------------|-----------|---------|
-| Indexing (100K docs) | 2.54 s | 1.20 s | **2.1x faster** |
-| Retrieval (100K docs) | 1,067 QPS | 2,730 QPS | **2.6x faster** |
+Values are bm25s speed relative to Python bm25s 0.3.2 (above 1x is faster).
 
-**Indexing Performance:**
-
-| Corpus Size | Python bm25s | bun-bm25s | Speedup |
-|-------------|--------------|-----------|---------|
-| 1,000 | 25 ms | 16 ms | **1.6x faster** |
-| 5,000 | 125 ms | 63 ms | **2.0x faster** |
-| 10,000 | 248 ms | 117 ms | **2.1x faster** |
-| 50,000 | 1.27 s | 571 ms | **2.2x faster** |
-| 100,000 | 2.54 s | 1.20 s | **2.1x faster** |
-
-**Retrieval Performance (1000 queries, k=10):**
-
-| Corpus Size | Python QPS | bun-bm25s QPS | Speedup |
-|-------------|------------|---------------|---------|
-| 5,000 | 15,217 | 49,262 | **3.2x faster** |
-| 10,000 | 8,369 | 27,103 | **3.2x faster** |
-| 50,000 | 1,984 | 6,086 | **3.1x faster** |
-| 100,000 | 1,067 | 3,181 | **3.0x faster** |
-
-**vs Python bm25s (numba backend):**
-
-When Python bm25s uses the numba JIT-compiled backend, the comparison changes:
-
-| Metric | Python (numba) | bun-bm25s | Notes |
-|--------|----------------|-----------|-------|
-| Indexing | Slower | **2.0x faster** | bun-bm25s wins |
-| Retrieval (small corpus) | 211K QPS | 6.8K QPS | numba JIT is faster |
-| Retrieval (large corpus) | ~3K QPS | ~3K QPS | Comparable |
-
-> **Note:** Python's numba backend excels at retrieval on small corpora due to JIT compilation. For larger corpora (50K+ docs), performance converges. bun-bm25s wins on indexing speed and offers zero dependencies with simpler deployment.
-
-**Summary:**
-- **2x faster** indexing vs both numpy and numba backends
-- **2.5-3x faster** retrieval vs numpy backend
-- **4.3M+ tokens/sec** indexing throughput
-- **3K+ QPS** retrieval on 100K documents
+- **Indexing** is about 1.8x to 2.8x faster than Python bm25s from 5,000 documents up, and slower on 1,000.
+- **Retrieval** is about 2.5x to 3.3x faster than bm25s's numpy backend from 5,000 documents up, but **slower than its numba backend at every corpus size measured**. If you need the fastest queries and can run Python with numba, use that.
+- The 1,000-document retrieval figures were measured before the top-k fix in this version. Small corpora used to fully sort every score on each query; they now use the same heap as large corpora, which makes 1K-document retrieval much faster in isolation. The comparison has not yet been re-run on an idle machine, so the table above still shows the old figures.
 
 Run the comparison yourself:
 
@@ -290,6 +260,8 @@ bun run benchmarks/compare.ts
 ```
 
 ### Detailed Benchmarks
+
+*Earlier run of `bun run benchmarks/benchmark.ts` on Apple M2 Max (12 cores, 96 GB), macOS 26.1, Bun 1.3.10, before the top-k fix.*
 
 ### Indexing & Retrieval Performance
 
@@ -328,7 +300,7 @@ bun run benchmarks/benchmark.ts
 
 ## How It Works
 
-bun-bm25s uses **eager sparse scoring** - a technique that precomputes BM25 scores during indexing and stores them in a Compressed Sparse Column (CSC) matrix. This allows O(1) lookup of all documents containing a given token at query time.
+bm25s uses **eager sparse scoring** - a technique that precomputes BM25 scores during indexing and stores them in a Compressed Sparse Column (CSC) matrix. This allows O(1) lookup of all documents containing a given token at query time.
 
 ### Architecture
 
@@ -352,7 +324,7 @@ This allows iterating over all documents containing a specific token in O(nnz) t
 ### Basic Search
 
 ```typescript
-import { BM25, tokenize } from "bun-bm25s";
+import { BM25, tokenize } from "bm25s";
 
 const docs = [
   "The quick brown fox jumps over the lazy dog",
@@ -375,7 +347,7 @@ results.documents[0].forEach((doc, i) => {
 ### With Custom Stemming
 
 ```typescript
-import { BM25, Tokenizer } from "bun-bm25s";
+import { BM25, Tokenizer } from "bm25s";
 
 // Porter-style suffix stripping (simplified)
 const stemmer = (word: string) => {
@@ -400,7 +372,7 @@ bm25.index(tokens);
 ### Persisting Indices
 
 ```typescript
-import { BM25, tokenize } from "bun-bm25s";
+import { BM25, tokenize } from "bm25s";
 
 // Index once
 const docs = loadMyDocuments(); // Your documents
