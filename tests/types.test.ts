@@ -6,7 +6,7 @@ import { describe, it, expect } from "bun:test";
 import * as path from "path";
 
 describe("Types", () => {
-  it("README quickstart and retrieve() types compile under --strict", () => {
+  it("README quickstart, retrieve() and tokenize() types compile under --strict", () => {
     const root = path.join(import.meta.dir, "..");
     const proc = Bun.spawnSync(
       [
@@ -14,7 +14,7 @@ describe("Types", () => {
         "--noEmit", "--strict", "--skipLibCheck",
         "--module", "esnext", "--moduleResolution", "bundler", "--target", "es2022",
         "--types", "node",
-        "tests/types/quickstart.ts", "tests/types/retrieve.ts",
+        "tests/types/quickstart.ts", "tests/types/retrieve.ts", "tests/types/tokenize.ts",
       ],
       { cwd: root },
     );

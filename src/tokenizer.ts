@@ -2,7 +2,7 @@
  * High-performance tokenization module for BM25
  */
 
-import { getStopwords, type StopwordsLanguage } from "./stopwords";
+import { getStopwords, type StopwordsLanguage } from "./stopwords.js";
 
 /**
  * Result of tokenization containing token IDs and vocabulary
@@ -75,6 +75,20 @@ export interface TokenizerOptions {
  * - Optional stemming
  * - Vocabulary management
  */
+/** Options for {@link Tokenizer.tokenize}. */
+export interface TokenizeCallOptions {
+  /** Update vocabulary (default: true for first call, false otherwise) */
+  updateVocab?: boolean | "if_empty";
+  /** Return format: token ids per text (default) or a {@link Tokenized} tuple */
+  returnAs?: "ids" | "tuple";
+}
+
+/** Options for {@link tokenize}. */
+export interface TokenizeOptions extends TokenizerOptions {
+  /** Return token ids per text (true) or a {@link Tokenized} tuple (false, default) */
+  returnIds?: boolean;
+}
+
 export class Tokenizer {
   private lower: boolean;
   private splitter: SplitterFn;
@@ -227,16 +241,15 @@ export class Tokenizer {
   }
 
   /**
-   * Tokenize multiple texts
+   * Tokenize multiple texts. Returns token ids per text, or a
+   * {@link Tokenized} tuple (ids plus vocabulary) with `returnAs: "tuple"`.
    */
+  tokenize(texts: string[], options: TokenizeCallOptions & { returnAs: "tuple" }): Tokenized;
+  tokenize(texts: string[], options?: TokenizeCallOptions & { returnAs?: "ids" }): number[][];
+  tokenize(texts: string[], options?: TokenizeCallOptions): number[][] | Tokenized;
   tokenize(
     texts: string[],
-    options: {
-      /** Update vocabulary (default: true for first call, false otherwise) */
-      updateVocab?: boolean | "if_empty";
-      /** Return format */
-      returnAs?: "ids" | "tuple";
-    } = {}
+    options: TokenizeCallOptions = {}
   ): number[][] | Tokenized {
     const updateVocab = options.updateVocab === "if_empty"
       ? this.wordToId.size === 0
@@ -322,21 +335,21 @@ export class Tokenizer {
  * console.log(result.vocab); // Map { 'hello' => 0, 'world' => 1, 'foo' => 2, 'bar' => 3 }
  * ```
  */
+export function tokenize(texts: string | string[], options: TokenizeOptions & { returnIds: true }): number[][];
+export function tokenize(texts: string | string[], options?: TokenizeOptions & { returnIds?: false }): Tokenized;
+export function tokenize(texts: string | string[], options?: TokenizeOptions): Tokenized | number[][];
 export function tokenize(
   texts: string | string[],
-  options: TokenizerOptions & {
-    /** Return IDs only (false) or Tokenized tuple (true, default) */
-    returnIds?: boolean;
-  } = {}
+  options: TokenizeOptions = {}
 ): Tokenized | number[][] {
   const inputTexts = typeof texts === "string" ? [texts] : texts;
   const tokenizer = new Tokenizer(options);
   
   if (options.returnIds === true) {
-    return tokenizer.tokenize(inputTexts, { returnAs: "ids" }) as number[][];
+    return tokenizer.tokenize(inputTexts, { returnAs: "ids" });
   }
   
-  return tokenizer.tokenize(inputTexts, { returnAs: "tuple" }) as Tokenized;
+  return tokenizer.tokenize(inputTexts, { returnAs: "tuple" });
 }
 
 /**

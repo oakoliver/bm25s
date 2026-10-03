@@ -14,10 +14,10 @@ import {
   computeRelevanceScores,
   getTfcScorer,
   getIdfScorer,
-} from "./scoring";
-import { buildCSCMatrix, type CSCMatrix, serializeCSC, deserializeCSC } from "./sparse";
-import { topK, type TopKResult } from "./selection";
-import { type Tokenized, tokenize, Tokenizer, type TokenizerOptions } from "./tokenizer";
+} from "./scoring.js";
+import { buildCSCMatrix, type CSCMatrix, serializeCSC, deserializeCSC } from "./sparse.js";
+import { topK, type TopKResult } from "./selection.js";
+import { type Tokenized, tokenize, Tokenizer, type TokenizerOptions } from "./tokenizer.js";
 
 /**
  * BM25 Configuration options
