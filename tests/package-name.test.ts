@@ -14,3 +14,12 @@ describe("package name", () => {
     expect(stale).toEqual([]);
   });
 });
+
+describe("package.json", () => {
+  it("does not make plain JavaScript users install TypeScript", () => {
+    const pkg = JSON.parse(readFileSync(join(import.meta.dir, "..", "package.json"), "utf8"));
+    const required = Object.keys(pkg.peerDependencies ?? {})
+      .filter((name) => !pkg.peerDependenciesMeta?.[name]?.optional);
+    expect(required).not.toContain("typescript");
+  });
+});
