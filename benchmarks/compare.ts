@@ -1,5 +1,5 @@
 /**
- * Comparison benchmark: bun-bm25s vs Python bm25s
+ * Comparison benchmark: bm25s (TypeScript) vs Python bm25s
  * 
  * Run with: bun run benchmarks/compare.ts
  */
@@ -210,7 +210,7 @@ function printComparisonTable(
   pythonLabel: string
 ): { avgIndexSpeedup: number; avgQpsSpeedup: number } {
   console.log("\n" + "=".repeat(120));
-  console.log(`INDEXING PERFORMANCE: bun-bm25s vs Python bm25s (${pythonLabel})`);
+  console.log(`INDEXING PERFORMANCE: bm25s (TypeScript) vs Python bm25s (${pythonLabel})`);
   console.log("=".repeat(120));
   console.log();
   console.log(
@@ -245,7 +245,7 @@ function printComparisonTable(
   }
   
   console.log("\n" + "=".repeat(120));
-  console.log(`RETRIEVAL PERFORMANCE: bun-bm25s vs Python bm25s (${pythonLabel}) - 1000 queries, k=10`);
+  console.log(`RETRIEVAL PERFORMANCE: bm25s (TypeScript) vs Python bm25s (${pythonLabel}) - 1000 queries, k=10`);
   console.log("=".repeat(120));
   console.log();
   console.log(
@@ -356,7 +356,7 @@ async function main(): Promise<void> {
   
   // Peak performance
   const lastBun = bunResults[bunResults.length - 1];
-  console.log(`Peak bun-bm25s Performance (${formatNumber(lastBun.corpus_size)} docs):`);
+  console.log(`Peak bm25s (TypeScript) Performance (${formatNumber(lastBun.corpus_size)} docs):`);
   console.log(`  - Index throughput: ${formatNumber(Math.round(lastBun.tokens_per_second))} tokens/sec`);
   console.log(`  - Query throughput: ${formatNumber(Math.round(lastBun.queries_per_second))} QPS`);
   console.log(`  - Query latency: ${formatTime(lastBun.avg_query_time_ms)}`);

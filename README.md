@@ -232,7 +232,7 @@ const bm25l = new BM25({ method: "bm25l", delta: 1.0 });
   <img src="https://raw.githubusercontent.com/oakoliver/bm25s/main/assets/speedup-light.png" alt="Line charts of bm25s speed relative to Python bm25s 0.3.2 by corpus size (1K to 100K documents). Indexing: about 0.7x at 1K, rising to 2.6x (numpy) and 2.8x (numba) at 100K. Retrieval: vs numpy 0.12x at 1K then 2.5x to 3.3x from 5K up; vs numba 0.02x at 1K rising to 0.86x at 100K, so the numba backend retrieves faster at every size." width="820">
 </picture>
 
-<sub>Chart: one run of <code>bun run benchmarks/compare.ts</code> on Apple M5 Max (macOS 27.0, Bun 1.4.0, Python bm25s 0.3.2, numpy 2.4.6, numba 0.64.0), 2026-10-03. Raw log: <a href="benchmarks/results/compare-2026-10-03-apple-m5-max.txt"><code>benchmarks/results/</code></a>; rendered by <a href="benchmarks/chart.py"><code>benchmarks/chart.py</code></a>. The table below is from the same run; the tables under Detailed Benchmarks are from an earlier run of <code>benchmarks/benchmark.ts</code> on Apple M2 Max (macOS 26.1, Bun 1.3.10).</sub>
+<sub>Chart: one run of <code>bun run benchmarks/compare.ts</code> on Apple M5 Max (macOS 27.0, Bun 1.4.0, Python bm25s 0.3.2, numpy 2.4.6, numba 0.64.0), 2026-10-03. Raw log: <a href="benchmarks/results/compare-2026-10-03-apple-m5-max.txt"><code>benchmarks/results/</code></a>; rendered by <a href="benchmarks/chart.py"><code>benchmarks/chart.py</code></a>. Measured on 1.x, before the 2.0.0 upstream sync. The table below is from the same run; the tables under Detailed Benchmarks are from an earlier run of <code>benchmarks/benchmark.ts</code> on Apple M2 Max (macOS 26.1, Bun 1.3.10).</sub>
 
 ### Comparison with Python bm25s
 
@@ -250,6 +250,7 @@ Values are bm25s speed relative to Python bm25s 0.3.2 (above 1x is faster).
 
 - **Indexing** is about 1.8x to 2.8x faster than Python bm25s from 5,000 documents up, and slower on 1,000.
 - **Retrieval** is about 2.5x to 3.3x faster than bm25s's numpy backend from 5,000 documents up, but **slower than its numba backend at every corpus size measured**. If you need the fastest queries and can run Python with numba, use that.
+- **These figures predate the 2.0.0 upstream sync.** They were measured on 1.x against Python bm25s 0.3.2; 2.0.0 changes the default tokenizer and stopwords (see [Upstream parity](#upstream-parity)), so it has not been re-measured yet.
 - The 1,000-document retrieval figures were measured before the top-k fix in this version. Small corpora used to fully sort every score on each query; they now use the same heap as large corpora, which makes 1K-document retrieval much faster in isolation. The comparison has not yet been re-run on an idle machine, so the table above still shows the old figures.
 
 Run the comparison yourself:

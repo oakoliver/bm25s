@@ -78,7 +78,7 @@ export interface RetrieveOptions {
  * 
  * @example
  * ```typescript
- * import { BM25, tokenize } from "bun-bm25s";
+ * import { BM25, tokenize } from "bm25s";
  * 
  * const corpus = [
  *   "a cat is a feline and likes to purr",
