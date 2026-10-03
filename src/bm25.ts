@@ -52,15 +52,29 @@ interface BM25Index {
 /**
  * Retrieval results
  */
-export interface RetrievalResults {
-  /** Retrieved document indices or documents */
-  documents: number[][] | any[][];
+export interface RetrievalResults<D = number> {
+  /** Retrieved document indices, or corpus items when a corpus is given or stored */
+  documents: D[][];
   /** Retrieval scores */
   scores: Float64Array[];
 }
 
+/** Options for {@link BM25.retrieve} */
+export interface RetrieveOptions {
+  /** Number of documents to retrieve per query - default: 10 */
+  k?: number;
+  /** Sort results by score (descending) - default: true */
+  sorted?: boolean;
+  /** Return format - default: "tuple" */
+  returnAs?: "tuple" | "documents";
+}
+
 /**
  * BM25 retriever class
+ *
+ * `Doc` is the type `retrieve()` returns for documents when no corpus is
+ * passed to it: token indices (`number`) by default. If you store a corpus
+ * with `index(tokens, { corpus })`, declare its item type: `new BM25<string>()`.
  * 
  * @example
  * ```typescript
@@ -85,7 +99,7 @@ export interface RetrievalResults {
  * console.log(results.scores);    // [[0.82, 0.45]]
  * ```
  */
-export class BM25 {
+export class BM25<Doc = number> {
   // BM25 Parameters
   private k1: number;
   private b: number;
@@ -96,7 +110,7 @@ export class BM25 {
   // Index storage
   private _index: BM25Index | null = null;
   private vocabDict: Map<string, number> = new Map();
-  private corpus: any[] | null = null;
+  private corpus: Doc[] | null = null;
 
   // Methods requiring non-occurrence scoring
   private static readonly NON_OCC_METHODS: BM25Method[] = ["bm25l", "bm25+"];
@@ -147,7 +161,7 @@ export class BM25 {
     corpus: Tokenized | number[][],
     options: {
       /** Store original corpus for retrieval */
-      corpus?: any[];
+      corpus?: Doc[];
       /** Show progress (currently unused, for API compatibility) */
       showProgress?: boolean;
       /** Leave progress bars after completion (currently unused, for API compatibility) */
@@ -295,19 +309,26 @@ export class BM25 {
    * @param queryTokens - Tokenized queries (from tokenize()) or array of token ID arrays
    * @param options - Retrieval options
    */
+  retrieve<D>(
+    queryTokens: Tokenized | number[][] | string[][],
+    options: RetrieveOptions & { corpus: D[]; returnAs: "documents" }
+  ): D[][];
+  retrieve<D>(
+    queryTokens: Tokenized | number[][] | string[][],
+    options: RetrieveOptions & { corpus: D[]; returnAs?: "tuple" }
+  ): RetrievalResults<D>;
   retrieve(
     queryTokens: Tokenized | number[][] | string[][],
-    options: {
-      /** Number of documents to retrieve per query - default: 10 */
-      k?: number;
-      /** Sort results by score (descending) - default: true */
-      sorted?: boolean;
-      /** Corpus to use for returning documents instead of indices */
-      corpus?: any[];
-      /** Return format - default: "tuple" */
-      returnAs?: "tuple" | "documents";
-    } = {}
-  ): RetrievalResults | any[][] {
+    options: RetrieveOptions & { corpus?: undefined; returnAs: "documents" }
+  ): Doc[][];
+  retrieve(
+    queryTokens: Tokenized | number[][] | string[][],
+    options?: RetrieveOptions & { corpus?: undefined; returnAs?: "tuple" }
+  ): RetrievalResults<Doc>;
+  retrieve(
+    queryTokens: Tokenized | number[][] | string[][],
+    options: RetrieveOptions & { corpus?: unknown[] } = {}
+  ): RetrievalResults<unknown> | unknown[][] {
     if (!this._index) {
       throw new Error("Index not built. Call index() first.");
     }
@@ -352,7 +373,7 @@ export class BM25 {
     }
 
     // Retrieve for each query
-    const allDocuments: (number[] | any[])[] = [];
+    const allDocuments: unknown[][] = [];
     const allScores: Float64Array[] = [];
 
     for (const queryIds of queryTokenIdArrays) {
@@ -377,7 +398,7 @@ export class BM25 {
     }
 
     return {
-      documents: allDocuments as number[][],
+      documents: allDocuments,
       scores: allScores,
     };
   }
@@ -454,9 +475,10 @@ export class BM25 {
   }
 
   /**
-   * Load a BM25 index from a directory
+   * Load a BM25 index from a directory. With `loadCorpus`, pass the stored
+   * corpus item type: `await BM25.load<string>(dir, { loadCorpus: true })`.
    */
-  static async load(
+  static async load<D = number>(
     saveDir: string,
     options: {
       loadCorpus?: boolean;
@@ -465,7 +487,7 @@ export class BM25 {
       /** Leave progress bars after completion (no-op; accepted for parity with bm25s >= 0.3.10) */
       leaveProgress?: boolean;
     } = {}
-  ): Promise<BM25> {
+  ): Promise<BM25<D>> {
     const fs = await import("fs/promises");
     const path = await import("path");
 
@@ -477,7 +499,7 @@ export class BM25 {
     const params = JSON.parse(paramsJson);
 
     // Create BM25 instance with saved parameters
-    const bm25 = new BM25({
+    const bm25 = new BM25<D>({
       k1: params.k1,
       b: params.b,
       delta: params.delta,
