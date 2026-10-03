@@ -1,12 +1,12 @@
 /**
- * bun-bm25s - Ultra-fast BM25 implementation for Bun
+ * bm25s - Ultra-fast BM25 implementation for Bun
  * 
  * Zero-dependency, high-performance lexical search library
  * inspired by Python's bm25s library.
  * 
  * @example
  * ```typescript
- * import { BM25, tokenize } from "bun-bm25s";
+ * import { BM25, tokenize } from "bm25s";
  * 
  * // Create corpus
  * const corpus = [

@@ -1,5 +1,5 @@
 /**
- * Benchmark script for bun-bm25s
+ * Benchmark script for bm25s (TypeScript)
  * 
  * Compares indexing and retrieval performance across different corpus sizes
  * and measures queries per second (QPS).
@@ -199,7 +199,7 @@ function runBenchmark(corpusSize: number, numQueries: number = 1000): {
  */
 function printResults(results: ReturnType<typeof runBenchmark>[]): void {
   console.log("\n" + "=".repeat(100));
-  console.log("BENCHMARK RESULTS - bun-bm25s");
+  console.log("BENCHMARK RESULTS - bm25s (TypeScript)");
   console.log("=".repeat(100));
   console.log();
   
