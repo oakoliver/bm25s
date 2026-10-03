@@ -2,7 +2,7 @@
  * High-performance tokenization module for BM25
  */
 
-import { getStopwords, type StopwordsLanguage } from "./stopwords";
+import { getStopwords, type StopwordsLanguage } from "./stopwords.js";
 
 /**
  * Result of tokenization containing token IDs and vocabulary

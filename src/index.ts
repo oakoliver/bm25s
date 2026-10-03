@@ -40,7 +40,7 @@
  */
 
 // Main BM25 class
-export { BM25, type BM25Options, type RetrievalResults, type RetrieveOptions } from "./bm25";
+export { BM25, type BM25Options, type RetrievalResults, type RetrieveOptions } from "./bm25.js";
 
 // Tokenization
 export {
@@ -53,7 +53,7 @@ export {
   type TokenizerOptions,
   type StemmerFn,
   type SplitterFn,
-} from "./tokenizer";
+} from "./tokenizer.js";
 
 // Stopwords
 export {
@@ -75,7 +75,7 @@ export {
   STOPWORDS_DANISH,
   STOPWORDS_MAP,
   type StopwordsLanguage,
-} from "./stopwords";
+} from "./stopwords.js";
 
 // Scoring utilities (for advanced users)
 export {
@@ -92,10 +92,10 @@ export {
   scoreIdfBm25plus,
   getTfcScorer,
   getIdfScorer,
-} from "./scoring";
+} from "./scoring.js";
 
 // Selection utilities
-export { topK, batchTopK, argmax, argsortDesc, type TopKResult } from "./selection";
+export { topK, batchTopK, argmax, argsortDesc, type TopKResult } from "./selection.js";
 
 // Sparse matrix utilities (for advanced users)
 export {
@@ -107,4 +107,4 @@ export {
   serializeCSC,
   deserializeCSC,
   type CSCMatrix,
-} from "./sparse";
+} from "./sparse.js";
