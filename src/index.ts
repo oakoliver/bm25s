@@ -51,6 +51,8 @@ export {
   defaultSplitter,
   type Tokenized,
   type TokenizerOptions,
+  type TokenizeOptions,
+  type TokenizeCallOptions,
   type StemmerFn,
   type SplitterFn,
 } from "./tokenizer.js";
