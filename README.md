@@ -10,6 +10,8 @@ A zero-dependency TypeScript implementation of BM25 full-text search, built for 
 
 <sub>Recorded with <a href="https://github.com/oakoliver/vhs">@oakoliver/vhs</a> from <a href="examples/quick-search.ts"><code>examples/quick-search.ts</code></a> (<a href="assets/tapes/search.tape">tape</a>).</sub>
 
+**Read the article:** [Getting Started with bm25s](https://engineering.oakoliver.com/articles/getting-started-bm25s-full-text-search-typescript) · [BM25 in TypeScript: how bm25s compares with Python](https://engineering.oakoliver.com/articles/bun-bm25s-beating-python-at-full-text-search)
+
 ## Features
 
 - **Fast indexing**: about 1.8x to 2.8x faster than Python bm25s from 5,000 documents up (see [Benchmarks](#benchmarks); retrieval is slower than bm25s's numba backend)
