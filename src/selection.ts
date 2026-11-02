@@ -22,12 +22,17 @@ export interface TopKResult {
  * @param scores - Array of scores to search
  * @param k - Number of top elements to return
  * @param sorted - Whether to sort results by score (descending)
+ * @throws RangeError if `k` is negative (upstream bm25s >= 0.3.14 raises ValueError);
+ *   `k = 0` returns an empty selection
  */
 export function topK(
   scores: Float64Array,
   k: number,
   sorted: boolean = true
 ): TopKResult {
+  if (k < 0) {
+    throw new RangeError(`k must be a non-negative integer, but got ${k}.`);
+  }
   const n = scores.length;
   k = Math.min(k, n);
 

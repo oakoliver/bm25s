@@ -40,7 +40,7 @@
  */
 
 // Main BM25 class
-export { BM25, type BM25Options, type RetrievalResults, type RetrieveOptions } from "./bm25.js";
+export { BM25, type BM25Options, type RetrievalResults, type RetrieveOptions, type SaveOptions, type LoadOptions } from "./bm25.js";
 
 // Tokenization
 export {

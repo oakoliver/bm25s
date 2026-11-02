@@ -69,6 +69,75 @@ export interface RetrieveOptions {
   returnAs?: "tuple" | "documents";
 }
 
+/** Options for {@link BM25.save} */
+export interface SaveOptions {
+  corpus?: any[];
+  /** Show progress (no-op; accepted for parity with bm25s >= 0.3.6) */
+  showProgress?: boolean;
+  /** Leave progress bars after completion (no-op; accepted for parity with bm25s >= 0.3.10) */
+  leaveProgress?: boolean;
+  /**
+   * What to do with a corpus entry that `JSON.stringify` cannot serialize
+   * (circular reference, BigInt, ...), as in bm25s >= 0.3.16.
+   *
+   * - `true` (default): throw a `TypeError` naming the entry's index, with the
+   *   original error as `cause`. Nothing is written to `saveDir`.
+   * - `false`: log a warning with `console.warn` and skip the entry. Skipping
+   *   misaligns the saved corpus with the index. This is upstream's default.
+   *
+   * Entries that serialize to nothing (`undefined`, functions, symbols) are
+   * always skipped with a warning, as upstream does for unsupported entry types.
+   */
+  raiseOnSerializationError?: boolean;
+}
+
+/** Options for {@link BM25.load} */
+export interface LoadOptions {
+  loadCorpus?: boolean;
+  /** Show progress (no-op; accepted for parity with bm25s >= 0.3.10) */
+  showProgress?: boolean;
+  /** Leave progress bars after completion (no-op; accepted for parity with bm25s >= 0.3.10) */
+  leaveProgress?: boolean;
+  /** Log verbosity (no-op; accepted for parity with bm25s >= 0.3.14) */
+  verbosity?: number;
+}
+
+/**
+ * Serialize corpus entries to JSON lines, mirroring Python bm25s 0.3.16's
+ * `BM25.save` handling of entries that cannot be serialized.
+ */
+function serializeCorpus(corpus: readonly unknown[], raiseOnError: boolean): string[] {
+  const lines: string[] = [];
+  for (let i = 0; i < corpus.length; i++) {
+    let line: string | undefined;
+    try {
+      line = JSON.stringify(corpus[i]);
+    } catch (e) {
+      const reason = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+      if (raiseOnError) {
+        throw new TypeError(
+          `Document at index ${i} could not be serialized to JSON (${reason}). ` +
+            "Skipping it would misalign the saved corpus with the index.",
+          { cause: e }
+        );
+      }
+      console.warn(
+        `Error saving document at index ${i}: ${reason}. ` +
+          "Skipping it may misalign the saved corpus with the index."
+      );
+      continue;
+    }
+    if (line === undefined) {
+      console.warn(
+        `Document at index ${i} is not JSON-serializable (undefined, function or symbol). Skipping.`
+      );
+      continue;
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+
 /**
  * BM25 retriever class
  *
@@ -333,7 +402,11 @@ export class BM25<Doc = number> {
       throw new Error("Index not built. Call index() first.");
     }
 
-    const k = Math.min(options.k ?? 10, this._index.numDocs);
+    const requestedK = options.k ?? 10;
+    if (requestedK < 0) {
+      throw new RangeError(`k must be a non-negative integer, but got ${requestedK}.`);
+    }
+    const k = Math.min(requestedK, this._index.numDocs);
     const sorted = options.sorted ?? true;
     const corpus = options.corpus ?? this.corpus;
     const returnAs = options.returnAs ?? "tuple";
@@ -408,17 +481,17 @@ export class BM25<Doc = number> {
    */
   async save(
     saveDir: string,
-    options: {
-      corpus?: any[];
-      /** Show progress (no-op; accepted for parity with bm25s >= 0.3.6) */
-      showProgress?: boolean;
-      /** Leave progress bars after completion (no-op; accepted for parity with bm25s >= 0.3.10) */
-      leaveProgress?: boolean;
-    } = {}
+    options: SaveOptions = {}
   ): Promise<void> {
     if (!this._index) {
       throw new Error("Index not built. Call index() first.");
     }
+
+    // Serialize the corpus first so a failure leaves saveDir untouched.
+    const corpusToSave = options.corpus ?? this.corpus;
+    const corpusLines = corpusToSave
+      ? serializeCorpus(corpusToSave, options.raiseOnSerializationError ?? true)
+      : null;
 
     const fs = await import("fs/promises");
     const path = await import("path");
@@ -467,10 +540,8 @@ export class BM25<Doc = number> {
     );
 
     // Save corpus if provided
-    const corpusToSave = options.corpus ?? this.corpus;
-    if (corpusToSave) {
-      const corpusLines = corpusToSave.map((doc) => JSON.stringify(doc)).join("\n");
-      await fs.writeFile(path.join(saveDir, "corpus.jsonl"), corpusLines);
+    if (corpusLines) {
+      await fs.writeFile(path.join(saveDir, "corpus.jsonl"), corpusLines.join("\n"));
     }
   }
 
@@ -480,13 +551,7 @@ export class BM25<Doc = number> {
    */
   static async load<D = number>(
     saveDir: string,
-    options: {
-      loadCorpus?: boolean;
-      /** Show progress (no-op; accepted for parity with bm25s >= 0.3.10) */
-      showProgress?: boolean;
-      /** Leave progress bars after completion (no-op; accepted for parity with bm25s >= 0.3.10) */
-      leaveProgress?: boolean;
-    } = {}
+    options: LoadOptions = {}
   ): Promise<BM25<D>> {
     const fs = await import("fs/promises");
     const path = await import("path");

@@ -2,7 +2,7 @@
 
 A zero-dependency TypeScript implementation of BM25 full-text search, built for Bun. A port of the Python [bm25s](https://github.com/xhluca/bm25s) library.
 
-> **Upstream parity:** tracks Python bm25s **v0.3.11** (stopword lists, default tokenization pattern, and scores for all five BM25 variants verified against upstream). See [Upstream parity](#upstream-parity).
+> **Upstream parity:** tracks Python bm25s **v0.3.16** (stopword lists, default tokenization pattern, and scores for all five BM25 variants verified against upstream). See [Upstream parity](#upstream-parity).
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/oakoliver/bm25s/main/assets/search.gif" alt="Terminal recording: bun examples/quick-search.ts indexes 12 short animal facts in under a millisecond, then answers two queries with ranked results, BM25 scores and score bars" width="820">
@@ -181,6 +181,9 @@ Save the index to disk.
 await retriever.save("./my_index", {
   corpus: originalDocs,  // Optionally save corpus
   // showProgress / leaveProgress are accepted for bm25s API parity (no-op here)
+  // raiseOnSerializationError: true (default) throws a TypeError naming a corpus entry
+  // JSON cannot serialize; false warns and skips it (upstream's default, but it
+  // misaligns the saved corpus with the index)
 });
 ```
 
@@ -191,16 +194,28 @@ Load an index from disk.
 ```typescript
 const retriever = await BM25.load("./my_index", {
   loadCorpus: true,  // Load saved corpus
+  // showProgress / leaveProgress / verbosity are accepted for bm25s API parity (no-op here)
 });
 ```
 
 ## Upstream parity
 
-This package is kept in sync with Python [bm25s](https://github.com/xhluca/bm25s) and is currently at parity with **v0.3.11**. Synced in 2.0.0 (from the v0.3.2 baseline). **Breaking:** default stopword lists and the word splitter now match upstream, so tokens and search results change; rebuild saved indexes after upgrading.
+This package is kept in sync with Python [bm25s](https://github.com/xhluca/bm25s) and is currently at parity with **v0.3.16** (2.1.0; the 2.0.0 sync was against v0.3.11). Between 0.3.11 and 0.3.16 upstream changed no scoring, stopword or tokenizer behaviour, and this release was checked against bm25s 0.3.16 itself: every stopword list, the default tokenization and the scores of all five variants match ([`tests/fixtures`](tests/fixtures)). Rebuilding saved indexes is not needed when moving from 2.0.0.
+
+- Negative `k` is rejected with a `RangeError` (v0.3.14)
+- `load()` accepts `verbosity` (v0.3.14), as a no-op
+- `save()` takes `raiseOnSerializationError` for corpus entries JSON cannot serialize (v0.3.16). **The default differs from upstream:** this port throws (as it always did), upstream warns and skips the entry. Pass `false` for upstream's behaviour.
+- Not applicable here: `weight_mask` fix (v0.3.14, no `weight_mask` in this port), JSONL corpus and mmap fixes (v0.3.12, v0.3.13), BEIR `load_qrels` (v0.3.15), numba `nogil` threading (v0.3.12)
+
+Per-change details are in [CHANGELOG.md](CHANGELOG.md).
+
+Earlier, in 2.0.0 (from the v0.3.2 baseline): **breaking** default stopword lists and the word splitter now match upstream, so tokens and search results changed.
 
 - Korean (`ko`, v0.3.4) and Danish (`da`, v0.3.11) stopwords
 - `showProgress` / `leaveProgress` options on `save()` / `BM25.load()` (v0.3.6, v0.3.10), accepted as no-ops
 - Parity fixes: all stopword lists now match upstream verbatim (notably the default `en` list is the 33-word Lucene list rather than NLTK's), and the default splitter is Unicode-aware like Python's `\w`
+
+The saved-index format is this package's own (`matrix.bin`, `vocab.json`, `params.json`, `corpus.jsonl`); it is not the `.npy` layout Python bm25s writes, so indexes cannot be exchanged between the two.
 
 Python-only upstream features (numba/jax backends, Hugging Face Hub integration, CLI/MCP server, BEIR utilities) are out of scope.
 
@@ -253,6 +268,7 @@ Values are bm25s speed relative to Python bm25s 0.3.2 (above 1x is faster).
 - **Indexing** is about 1.8x to 2.8x faster than Python bm25s from 5,000 documents up, and slower on 1,000.
 - **Retrieval** is about 2.5x to 3.3x faster than bm25s's numpy backend from 5,000 documents up, but **slower than its numba backend at every corpus size measured**. If you need the fastest queries and can run Python with numba, use that.
 - **These figures predate the 2.0.0 upstream sync.** They were measured on 1.x against Python bm25s 0.3.2; 2.0.0 changes the default tokenizer and stopwords (see [Upstream parity](#upstream-parity)), so it has not been re-measured yet.
+- **2.1.0 did not change speed.** `benchmarks/benchmark.ts` on Apple M5 Max (Bun 1.4.4), before and after the sync, each on a quiet machine: 100,000 documents index in 506 ms before and 488 to 496 ms after, and query at 170 µs before and 168 to 172 µs after (5,878 vs 5,821 to 5,970 QPS). All differences are within run-to-run noise.
 - The 1,000-document retrieval figures were measured before the top-k fix in this version. Small corpora used to fully sort every score on each query; they now use the same heap as large corpora, which makes 1K-document retrieval much faster in isolation. The comparison has not yet been re-run on an idle machine, so the table above still shows the old figures.
 
 Run the comparison yourself:
